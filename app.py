@@ -4,7 +4,7 @@ import datetime
 from flask_cors import CORS
 
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, redirect
 from flask_jwt import JWT, jwt_required, current_identity
 
 
@@ -28,9 +28,7 @@ def fetch_users():
     return new_data
 
 
-
-
-
+# ---Creating User Table---
 def init_user_table():
     conn = sqlite3.connect('online_shopping.db')
     print("Opened database successfully")
@@ -44,12 +42,15 @@ def init_user_table():
     conn.close()
 
 
+# ---CREATING PRODUCTS TABLE---
 def init_products_table():
     with sqlite3.connect('online_shopping.db') as conn:
         conn.execute("CREATE TABLE IF NOT EXISTS product (id INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "name TEXT NOT NULL,"
                      "price TEXT NOT NULL,"
                      "description TEXT NOT NULL,"
+                     "type TEXT NOT NULL,"
+                     "images TEXT NOT NULL,"
                      "date_created TEXT NOT NULL)")
     print("products table created successfully.")
 
@@ -87,6 +88,19 @@ def protected():
     return '%s' % current_identity
 
 
+# ---Image Hosting---
+@app.route('/image-hosting/')
+def image_hosting():
+    with sqlite3.connect("online_shopping.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT images FROM product WHERE id='2'")
+        image = cursor.fetchone()
+        for i in image:
+            image1 = i
+    return redirect(image1)
+
+
+# ---User Registration---
 @app.route('/user-registration/', methods=["POST"])
 def user_registration():
     response = {}
@@ -111,8 +125,9 @@ def user_registration():
         return response
 
 
+# ---Creating Products---
 @app.route('/create-product/', methods=["POST"])
-#@jwt_required()
+@jwt_required()
 def create_product():
     response = {}
 
@@ -121,6 +136,7 @@ def create_product():
         price = request.form['price']
         type_ = request.form['type']
         description = request.form['description']
+        images = request.form['images']
         date_created = datetime.datetime.now()
 
         with sqlite3.connect('online_shopping.db') as conn:
@@ -130,13 +146,15 @@ def create_product():
                            "price,"
                            "description,"
                            "type,"
-                           "date_created) VALUES(?, ?, ?, ?, ?)", (name, price, description, type_, date_created))
+                           "images,"
+                           "date_created) VALUES(?, ?, ?, ?, ?)", (name, price, description, type_, images, date_created))
             conn.commit()
             response["status_code"] = 201
             response['description'] = "Product added succesfully"
         return response
 
 
+# ---Get Products---
 @app.route('/get-product/', methods=["GET"])
 def get_product():
     response = {}
@@ -151,6 +169,7 @@ def get_product():
     return response
 
 
+# ---Sorting Products by Date---
 @app.route('/sort-product/', methods=["GET"])
 def sort_product():
     response = {}
@@ -165,6 +184,7 @@ def sort_product():
     return response
 
 
+# ---Filtering Products by Type---
 @app.route('/filter-product/<type>/', methods=["GET"])
 def filter_product(type):
     response = {}
@@ -179,6 +199,7 @@ def filter_product(type):
     return jsonify(response)
 
 
+# ---Delete Products---
 @app.route("/delete-product/<int:product_id>")
 @jwt_required()
 def delete_post(product_id):
@@ -192,8 +213,9 @@ def delete_post(product_id):
     return response
 
 
+# ---Edit Products---
 @app.route('/edit-product/<int:product_id>/', methods=["PUT"])
-#@jwt_required()
+@jwt_required()
 def edit_post(product_id):
     response = {}
 
@@ -230,9 +252,20 @@ def edit_post(product_id):
                     conn.commit()
                     response['message'] = "Update was successful"
                     response['status_code'] = 200
+
+            if incoming_data.get("images") is not None:
+                put_data["images"] = incoming_data.get("images")
+                with sqlite3.connect('online_shopping.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE product SET images =? WHERE id=?",
+                                   (put_data["images"], product_id))
+                    conn.commit()
+                    response['message'] = "Update was successful"
+                    response['status_code'] = 200
     return response
 
 
+# ---Get Product by ID---
 @app.route('/get-product/<int:product_id>/', methods=["GET"])
 def get_post(product_id):
     response = {}
@@ -254,9 +287,16 @@ if __name__ == "__main__":
 
 # with sqlite3.connect('online_shopping.db') as conn:
 #     cursor = conn.cursor()
-#     # cursor.execute('ALTER TABLE product ADD COLUMN type TEXT')
-#     # cursor.execute('UPDATE product SET type = "body lotion" WHERE name = "nivea men face cleanser gel deep"')
+#     cursor.execute('ALTER TABLE product ADD COLUMN images TEXT')
+#     cursor.execute('UPDATE product SET images = "https://images-us.nivea.com/-/media/media-center-items/a/a/8/371878-1.png" WHERE name = "nivea men face cleanser gel deep"')
 #     cursor.execute('SELECT * FROM product')
 #     conn.commit()
 #     results = cursor.fetchall()
 #     print(results)
+
+
+# with sqlite3.connect('online_shopping.db') as conn:
+#     cursor = conn.cursor()
+#     cursor.execute('SELECT sum(price) AS total_price FROM product')
+#     total = cursor.fetchone()
+#     print(total)
