@@ -285,18 +285,3 @@ if __name__ == "__main__":
     app.debug = True
     app.run()
 
-# with sqlite3.connect('online_shopping.db') as conn:
-#     cursor = conn.cursor()
-#     cursor.execute('ALTER TABLE product ADD COLUMN images TEXT')
-#     cursor.execute('UPDATE product SET images = "https://images-us.nivea.com/-/media/media-center-items/a/a/8/371878-1.png" WHERE name = "nivea men face cleanser gel deep"')
-#     cursor.execute('SELECT * FROM product')
-#     conn.commit()
-#     results = cursor.fetchall()
-#     print(results)
-
-
-# with sqlite3.connect('online_shopping.db') as conn:
-#     cursor = conn.cursor()
-#     cursor.execute('SELECT sum(price) AS total_price FROM product')
-#     total = cursor.fetchone()
-#     print(total)
