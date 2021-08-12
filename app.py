@@ -83,7 +83,7 @@ jwt = JWT(app, authenticate, identity)
 
 
 @app.route('/protected')
-@jwt_required()
+#@jwt_required()
 def protected():
     return '%s' % current_identity
 
@@ -127,7 +127,7 @@ def user_registration():
 
 # ---Creating Products---
 @app.route('/create-product/', methods=["POST"])
-@jwt_required()
+#@jwt_required()
 def create_product():
     response = {}
 
@@ -201,7 +201,7 @@ def filter_product(type):
 
 # ---Delete Products---
 @app.route("/delete-product/<int:product_id>")
-@jwt_required()
+#@jwt_required()
 def delete_post(product_id):
     response = {}
     with sqlite3.connect("online_shopping.db") as conn:
@@ -215,7 +215,7 @@ def delete_post(product_id):
 
 # ---Edit Products---
 @app.route('/edit-product/<int:product_id>/', methods=["PUT"])
-@jwt_required()
+#@jwt_required()
 def edit_post(product_id):
     response = {}
 
