@@ -78,6 +78,7 @@ def identity(payload):
 app = Flask(__name__)
 app.debug = True
 app.config['SECRET_KEY'] = 'super-secret'
+CORS(app)
 
 jwt = JWT(app, authenticate, identity)
 
@@ -147,7 +148,7 @@ def create_product():
                            "description,"
                            "type,"
                            "images,"
-                           "date_created) VALUES(?, ?, ?, ?, ?)", (name, price, description, type_, images, date_created))
+                           "date_created) VALUES(?, ?, ?, ?, ?, ?)", (name, price, description, type_, images, date_created))
             conn.commit()
             response["status_code"] = 201
             response['description'] = "Product added succesfully"
