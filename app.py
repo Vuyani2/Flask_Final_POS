@@ -133,11 +133,11 @@ def create_product():
     response = {}
 
     if request.method == "POST":
-        name = request.form['name']
-        price = request.form['price']
-        type_ = request.form['type']
-        description = request.form['description']
-        images = request.form['images']
+        name = request.json['name']
+        price = request.json['price']
+        type_ = request.json['type']
+        description = request.json['description']
+        images = request.json['images']
         date_created = datetime.datetime.now()
 
         with sqlite3.connect('online_shopping.db') as conn:
